@@ -488,11 +488,44 @@
 
 ---
 
-- 🧩 **UC24 – Retrieve Contacts from Database :**  
-  _Pending implementation._
+- 🧩 **UC24 – Update Contact in JSON Server using REST Assured :**
+  - Enhances the AddressBook system to support updating existing contact records in an external JSON server through REST API calls executed from automated tests.
 
-- 🧩 **UC25 – Update Contact in Database :**  
-  _Pending implementation._
+  **Purpose**
+  - Enable the system to modify existing contact information stored in a REST-based data source.
+  - Demonstrate the use of REST Assured to perform HTTP PUT requests and validate responses.
+
+  **Implementation**
+  - Used the **json-server** mock REST API running on **port 3000** with a `db.json` file storing contact records.
+  - Implemented a REST Assured test that sends a **PUT request** to:
+    ```
+    PUT /contacts/{id}
+    ```
+  - Sent updated contact data in JSON format using `contentType("application/json")` and a request body.
+  - Verified the server response using HTTP status **200 OK** and validated the returned JSON response.
+
+  **Outcome**
+  - The AddressBook system can now update existing contact records in an external JSON server through REST API calls executed from automated tests, enabling verification of contact update functionality.
+
+---
+
+- 🧩 **UC25 – Delete Contact from JSON Server using REST Assured :**
+  - Enhances the AddressBook system to support deleting contact records from an external JSON server through REST API calls executed from automated tests.
+
+  **Purpose**
+  - Enable the system to remove contact records stored in a REST-based data source.
+  - Demonstrate the use of REST Assured to perform HTTP DELETE requests and validate responses.
+
+  **Implementation**
+  - Used the **json-server** mock REST API running on **port 3000** with a `db.json` file storing contact records.
+  - Implemented a REST Assured test that sends a **DELETE request** to:
+    ```
+    DELETE /contacts/{id}
+    ```
+  - Verified the server response using HTTP status **200 OK** to confirm successful deletion.
+
+  **Outcome**
+  - The AddressBook system can now delete contact records from an external JSON server through REST API calls executed from automated tests, enabling verification of contact deletion functionality.
 
 ---
 
@@ -529,109 +562,3 @@ mvnw spring-boot:run
 ```
 ---
 
-### 📂 Project Structure
-
-```
-
-📦 AddressBookApp
-│
-├── 📁 .git
-├── 📁 .mvn
-│
-├── 📁 src
-│   │
-│   ├── 📁 main
-│   │   │
-│   │   ├── 📁 java
-│   │   │   └── 📁 com
-│   │   │       └── 📁 addressbook
-│   │   │           │
-│   │   │           ├── 📁 controller
-│   │   │           │   └── 📄 AddressBookController.java
-│   │   │           │
-│   │   │           ├── 📁 dto
-│   │   │           │   └── 📄 ContactDTO.java
-│   │   │           │
-│   │   │           ├── 📁 model
-│   │   │           │   ├── 📄 Contact.java
-│   │   │           │   └── 📄 AddressBook.java
-│   │   │           │
-│   │   │           ├── 📁 repository
-│   │   │           │   └── 📄 ContactRepository.java
-│   │   │           │
-│   │   │           ├── 📁 service
-│   │   │           │   └── 📄 AddressBookService.java
-│   │   │           │
-│   │   │           ├── 📁 storage
-│   │   │           │   ├── 📄 ContactStorage.java
-│   │   │           │   ├── 📄 FileStorage.java
-│   │   │           │   ├── 📄 CSVStorage.java
-│   │   │           │   └── 📄 JSONStorage.java
-│   │   │           │
-│   │   │           ├── 📁 threads
-│   │   │           │   └── 📄 AddContactTask.java
-│   │   │           │
-│   │   │           ├── 📁 util
-│   │   │           │   ├── 📄 FileUtil.java
-│   │   │           │   ├── 📄 CSVUtil.java
-│   │   │           │   └── 📄 JSONUtil.java
-│   │   │           │
-│   │   │           └── 📄 AddressBookApplication.java
-│   │   │
-│   │   └── 📁 resources
-│   │       └── 📄 application.properties
-│   │
-│   └── 📁 test
-│       └── 📁 java
-│           └── 📁 com
-│               └── 📁 addressbook
-│                   │
-│                   ├── 📄 AddressBookApplicationTests.java
-│                   ├── 📄 ContactTest.java
-│                   ├── 📄 AddressBookServiceTest.java
-│                   ├── 📄 ContactRepositoryTest.java
-│                   └── 📄 AddressBookJsonServerTest.java
-│
-├── ⚙️ pom.xml
-│
-├── 📄 mvnw
-├── 📄 mvnw.cmd
-│
-├── 📄 .gitattributes
-├── 🚫 .gitignore
-│
-├── 📜 LICENSE
-└── 📘 README.md
-```
-
----
-
-### ⚙️ Development Approach
-
-> This project follows an incremental **Test-Driven Development (TDD)** workflow:
-
-- Tests are written first to define expected behaviour.
-- Implementation code is developed to satisfy the tests.
-- Each Use Case introduces new functionality in controlled steps.
-- Existing behaviour is preserved through continuous refactoring.
-- The system evolves through layered architecture using Controller, Service, and Repository separation.
-- Progressive enhancements introduce search, sorting, persistence, multithreading, and database support.
-
----
-
-### 📄 License
-
-> This project is licensed under the MIT License.
-
----
-
-### 👨‍💻 Author
-
-**Abhishek Puri Goswami**  
-_Java developer focused on clean architecture, object-oriented programming, and incremental software development using Test-Driven Development._
-
----
-
-<div align="center">
-✨ Incrementally developed using Test-Driven Development and progressive feature expansion.
-</div>
