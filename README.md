@@ -406,14 +406,3 @@ mvnw spring-boot:run
 > This project is licensed under the MIT License.
 
 ---
-
-### 👨‍💻 Author
-
-**Abhishek Puri Goswami**  
-_Java developer focused on clean architecture, object-oriented programming, and incremental software development using Test-Driven Development._
-
----
-
-<div align="center">
-✨ Incrementally developed using Test-Driven Development and progressive feature expansion.
-</div>
