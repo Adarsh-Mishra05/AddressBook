@@ -287,38 +287,245 @@
     ```
   - Added unit tests to validate CSV file creation, reading contacts from CSV, handling multiple contacts, and empty CSV file scenarios.
 
-- 🧩 **UC15 – Write Contacts to CSV File :**  
-  _Pending implementation._
+---
 
-- 🧩 **UC16 – Read Contacts from CSV File :**  
-  _Pending implementation._
+- 🧩 **UC15 – JSON File Support :**
+  - Introduces JSON-based persistence for Address Book contacts using the GSON library.
+  - Enables exporting contacts to JSON files and loading them back into the system.
 
-- 🧩 **UC17 – Write Contacts to JSON File :**  
-  _Pending implementation._
+  **Purpose**
+  - Allow contacts to be stored and retrieved in a structured JSON format.
+  - Provide a widely used and flexible format for data storage and exchange.
 
-- 🧩 **UC18 – Read Contacts from JSON File :**  
-  _Pending implementation._
+  **Implementation**
+  - Created a utility class `JSONUtil` to handle JSON serialization and deserialization using the GSON library.
+  - Implemented functionality to save contacts from an Address Book to a JSON file and load contacts from a JSON file into memory.
+  - Added REST endpoints in `AddressBookController`:
+    ```
+    POST /addressbooks/{bookName}/save-json
+    GET /addressbooks/load-json
+    ```
+  - Added unit tests to validate JSON file creation, reading JSON files, handling multiple contacts, and empty JSON file scenarios.
 
-- 🧩 **UC19 – Add Contacts Using Threads :**  
-  _Pending implementation._
+---
 
-- 🧩 **UC20 – Measure Time for Threaded Contact Addition :**  
-  _Pending implementation._
+- 🧩 **UC16 – Retrieve Contacts from Database & Storage Layer Refactor :**
+  - Introduces database integration to retrieve contacts using JDBC and refactors the storage design to support multiple persistence formats through a storage abstraction layer.
 
-- 🧩 **UC21 – Add Multiple Contacts Using Thread Pools :**  
-  _Pending implementation._
+  **Purpose**
+  - Enable retrieval of contacts stored in a relational database.
+  - Decouple storage logic from business logic to support multiple storage formats such as file, CSV, and JSON.
 
-- 🧩 **UC22 – Measure Thread Pool Performance :**  
-  _Pending implementation._
+  **Implementation**
+  - Externalized database configuration in `application.properties`, allowing Spring Boot to automatically configure a `DataSource`.
+  - Implemented a `ContactRepository` to execute SQL queries and map database rows to `Contact` objects.
+  - Added a REST endpoint in `AddressBookController`:
+    ```
+    GET /addressbooks/db/contacts
+    ````
+  - Introduced a storage abstraction using the `ContactStorage` interface defining common operations for saving and loading contacts.
+  - Implemented three storage strategies:
+    - `FileStorage` – Handles standard Java File IO operations.
+    - `CSVStorage` – Supports CSV persistence using the OpenCSV library.
+    - `JSONStorage` – Supports JSON serialization and deserialization using the Gson library.
+  - Added integration tests using `@SpringBootTest` to validate database connectivity and data retrieval.
 
-- 🧩 **UC23 – Store Address Book in Database :**  
-  _Pending implementation._
+---
 
-- 🧩 **UC24 – Retrieve Contacts from Database :**  
-  _Pending implementation._
+- 🧩 **UC17 – Update Contact Information in Database :**
+  - Extends the database integration to support updating existing contact information stored in the database.
+  - Enables modification of contact details through JDBC update operations.
 
-- 🧩 **UC25 – Update Contact in Database :**  
-  _Pending implementation._
+  **Purpose**
+  - Allow the system to update stored contact records in the database.
+  - Provide a mechanism to modify specific contact attributes such as city based on the person’s name.
+
+  **Implementation**
+  - Extended the `ContactRepository` to execute an SQL `UPDATE` query using JDBC `PreparedStatement`.
+  - Implemented logic to update the city of a contact identified by the person's name.
+  - Added a REST endpoint in `AddressBookController`:
+    ```
+    PUT /addressbooks/db/update-city
+    ```
+  - Added integration tests to verify successful database updates and ensure correct JDBC interaction.
+
+  **Outcome**
+  - The AddressBook system can now update existing contact records directly in the database using JDBC update operations.
+
+---
+
+- 🧩 **UC18 – Retrieve Contacts by Date Range :**
+  - Enhances database querying capabilities to retrieve contacts created within a specified date range.
+  - Enables filtering of contact records based on their creation timestamp.
+
+  **Purpose**
+  - Allow users to fetch contacts added to the Address Book during a specific time period.
+  - Provide date-based filtering for better data analysis and retrieval.
+
+  **Implementation**
+  - Added a `date_added` column in the database to track when contacts are created.
+  - Extended `ContactRepository` to execute a JDBC query using `PreparedStatement` that retrieves contacts whose `date_added` values fall between two given dates.
+  - Added a REST endpoint in `AddressBookController`:
+    ```
+    GET /addressbooks/db/contacts-by-date
+    ```
+  - Added unit tests to validate correct database filtering and retrieval of contacts within the specified date range.
+  
+  **Outcome**
+  - The AddressBook system can now retrieve contacts from the database based on a given date range using JDBC queries.
+
+---
+
+- 🧩 **UC19 – Retrieve Contact Counts by City or State from Database :**
+  - Enhances the AddressBook system to retrieve and compute the number of contacts stored in the database grouped by city and state, while introducing DTO-based data transfer for API responses.
+
+  **Purpose**
+  - Allow the application to analyze contact distribution based on geographic locations.
+  - Provide aggregated statistics showing how many contacts belong to each city or state.
+  - Improve API design by using DTO objects instead of exposing internal domain models.
+
+  **Implementation**
+  - Reused the existing JDBC database connectivity and `ContactRepository` to retrieve contacts from the database.
+  - Implemented grouping and counting logic in the service layer using Java Streams with `groupingBy()` and `counting()`.
+  - Added REST endpoints in `AddressBookController`:
+    ```
+    GET /addressbooks/db/count/city
+    GET /addressbooks/db/count/state
+    ```
+  - Introduced `ContactDTO` to represent API request and response data.
+  - Updated controller methods to return DTO objects while the service layer handles conversion between DTOs and model entities.
+  - Added unit tests to validate correct grouping, counting, and DTO-based responses.
+
+  **Outcome**
+  - The AddressBook system can now compute and display the number of contacts stored in the database for each city or state.
+  - The API now uses a DTO layer, improving separation between external API data and internal domain models.
+
+---
+
+- 🧩 **UC20 – Add Contact to Database Using JDBC :**
+  - Enhances the AddressBook system to support inserting new contact records directly into the database using JDBC.
+
+  **Purpose**
+  - Allow the application to persist newly created contacts in the database.
+  - Ensure reliable and secure database insertion with proper transaction handling.
+
+  **Implementation**
+  - Extended `ContactRepository` with an SQL `INSERT` query implemented using JDBC `PreparedStatement`.
+  - Implemented transaction management using `setAutoCommit(false)`, `commit()`, and `rollback()` to ensure database consistency.
+  - Added a service method in `AddressBookService` to handle contact insertion through the repository layer.
+  - Added a REST endpoint in `AddressBookController`:
+    ```
+    POST /addressbooks/db/add-contact
+    ```
+  - Added unit tests to verify successful database insertion and correct interaction with the repository layer.
+
+  **Outcome**
+  - The AddressBook system can now insert new contact records into the database using JDBC with proper transaction management and layered architecture support.
+
+---
+
+- 🧩 **UC21 – Add Multiple Contacts to Database Using Multithreading :**
+  - Enhances the AddressBook system to support inserting multiple contact records into the database concurrently using multithreading.
+
+  **Purpose**
+  - Improve performance when inserting multiple contacts by executing database operations concurrently.
+  - Demonstrate the use of Java multithreading for handling parallel database operations.
+
+  **Implementation**
+  - Created a `threads` package and introduced an `AddContactTask` class implementing `Runnable` to handle individual contact insertion tasks.
+  - Reused the existing `addContact()` method in `ContactRepository` to perform JDBC database insertion.
+  - Implemented a service method in `AddressBookService` to create and manage multiple threads, each responsible for inserting one contact into the database.
+  - Added a REST endpoint in `AddressBookController`:
+    ```
+    POST /addressbooks/db/add-multiple
+    ```
+  - Added tests to verify successful insertion of multiple contacts and ensure all threads complete execution before returning the response.
+
+  **Outcome**
+  - The AddressBook system can now insert multiple contacts into the database concurrently using multithreading, enabling efficient batch insertion operations.
+
+---
+
+- 🧩 **UC22 – Read Contacts from JSON Server using REST Assured :**
+  - Enhances the AddressBook system to retrieve contact records from an external JSON server using REST API calls executed through automated tests.
+
+  **Purpose**
+  - Enable the application to integrate with an external REST service providing contact data.
+  - Demonstrate REST API testing using the REST Assured library.
+
+  **Implementation**
+  - Installed and configured **json-server** to simulate a REST API using a `db.json` file containing sample contact records.
+  - Started the JSON server on **port 3000**, exposing REST endpoints such as:
+    ```
+    GET /contacts
+    ```
+  - Added the **REST Assured dependency** to the project to perform HTTP requests within JUnit tests.
+  - Implemented a test case that sends a **GET request** to the JSON server endpoint and validates the response status code and returned contact data.
+
+  **Outcome**
+  - The AddressBook system can now retrieve contact data from an external JSON server using REST API calls executed from automated tests, enabling integration testing of external REST services.
+
+---
+
+- 🧩 **UC23 – Add Contacts to JSON Server using REST Assured :**
+  - Enhances the AddressBook system to support adding new contact records to an external JSON server through REST API calls executed from automated tests.
+
+  **Purpose**
+  - Enable the system to create new contact entries in a REST-based data source.
+  - Demonstrate how REST Assured can be used to send POST requests and validate responses.
+
+  **Implementation**
+  - Used the **json-server** mock REST API running on **port 3000** with a `db.json` file storing contact records.
+  - Implemented a REST Assured test that sends a **POST request** to:
+    ```
+    POST /contacts
+    ```
+  - Sent contact data in JSON format using `contentType("application/json")` and a request body.
+  - Verified the server response using HTTP status **201 Created** and validated the returned JSON response.
+
+  **Outcome**
+  - The AddressBook system can now add new contact records to an external JSON server through REST API calls executed from automated tests, enabling verification of contact creation functionality.
+
+---
+
+- 🧩 **UC24 – Update Contact in JSON Server using REST Assured :**
+  - Enhances the AddressBook system to support updating existing contact records in an external JSON server through REST API calls executed from automated tests.
+
+  **Purpose**
+  - Enable the system to modify existing contact information stored in a REST-based data source.
+  - Demonstrate the use of REST Assured to perform HTTP PUT requests and validate responses.
+
+  **Implementation**
+  - Used the **json-server** mock REST API running on **port 3000** with a `db.json` file storing contact records.
+  - Implemented a REST Assured test that sends a **PUT request** to:
+    ```
+    PUT /contacts/{id}
+    ```
+  - Sent updated contact data in JSON format using `contentType("application/json")` and a request body.
+  - Verified the server response using HTTP status **200 OK** and validated the returned JSON response.
+
+  **Outcome**
+  - The AddressBook system can now update existing contact records in an external JSON server through REST API calls executed from automated tests, enabling verification of contact update functionality.
+
+---
+
+- 🧩 **UC25 – Delete Contact from JSON Server using REST Assured :**
+  - Enhances the AddressBook system to support deleting contact records from an external JSON server through REST API calls executed from automated tests.
+
+  **Purpose**
+  - Enable the system to remove contact records stored in a REST-based data source.
+  - Demonstrate the use of REST Assured to perform HTTP DELETE requests and validate responses.
+
+  **Implementation**
+  - Used the **json-server** mock REST API running on **port 3000** with a `db.json` file storing contact records.
+  - Implemented a REST Assured test that sends a **DELETE request** to:
+    ```
+    DELETE /contacts/{id}
+    ```
+  - Verified the server response using HTTP status **200 OK** to confirm successful deletion.
+
+  **Outcome**
+  - The AddressBook system can now delete contact records from an external JSON server through REST API calls executed from automated tests, enabling verification of contact deletion functionality.
 
 ---
 
@@ -355,99 +562,3 @@ mvnw spring-boot:run
 ```
 ---
 
-### 📂 Project Structure
-
-```
-
-📦 AddressBookApp
-│
-├── 📁 .git
-├── 📁 .mvn
-│
-├── 📁 src
-│   │
-│   ├── 📁 main
-│   │   │
-│   │   ├── 📁 java
-│   │   │   └── 📁 com
-│   │   │       └── 📁 addressbook
-│   │   │           │
-│   │   │           ├── 📁 controller
-│   │   │           │   └── 📄 AddressBookController.java
-│   │   │           │
-│   │   │           ├── 📁 dto
-│   │   │           │
-│   │   │           ├── 📁 model
-│   │   │           │   ├── 📄 Contact.java
-│   │   │           │   └── 📄 AddressBook.java
-│   │   │           │
-│   │   │           ├── 📁 repository
-│   │   │           │
-│   │   │           ├── 📁 service
-│   │   │           │   └── 📄 AddressBookService.java
-│   │   │           │
-│   │   │           ├── 📁 storage
-│   │   │           │
-│   │   │           ├── 📁 threads
-│   │   │           │
-│   │   │           ├── 📁 util
-│   │   │           │   ├── 📄 FileUtil.java
-│   │   │           │   └── 📄 CSVUtil.java
-│   │   │           │
-│   │   │           └── 📄 AddressBookApplication.java
-│   │   │
-│   │   └── 📁 resources
-│   │       └── 📄 application.properties
-│   │
-│   └── 📁 test
-│       └── 📁 java
-│           └── 📁 com
-│               └── 📁 addressbook
-│                   │
-│                   ├── 📄 AddressBookApplicationTests.java
-│                   ├── 📄 ContactTest.java
-│                   └── 📄 AddressBookServiceTest.java
-│
-├── ⚙️ pom.xml
-│
-├── 📄 mvnw
-├── 📄 mvnw.cmd
-│
-├── 📄 .gitattributes
-├── 🚫 .gitignore
-│
-├── 📜 LICENSE
-└── 📘 README.md
-```
-
----
-
-### ⚙️ Development Approach
-
-> This project follows an incremental **Test-Driven Development (TDD)** workflow:
-
-- Tests are written first to define expected behaviour.
-- Implementation code is developed to satisfy the tests.
-- Each Use Case introduces new functionality in controlled steps.
-- Existing behaviour is preserved through continuous refactoring.
-- The system evolves through layered architecture using Controller, Service, and Repository separation.
-- Progressive enhancements introduce search, sorting, persistence, multithreading, and database support.
-
----
-
-### 📄 License
-
-> This project is licensed under the MIT License.
-
----
-
-### 👨‍💻 Author
-
-**Abhishek Puri Goswami**  
-_Java developer focused on clean architecture, object-oriented programming, and incremental software development using Test-Driven Development._
-
----
-
-<div align="center">
-✨ Incrementally developed using Test-Driven Development and progressive feature expansion.
-</div>
